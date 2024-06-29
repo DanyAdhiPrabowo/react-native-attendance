@@ -8,10 +8,16 @@ import {
   View,
 } from 'react-native';
 import dummyData from '../data.json';
+import moment from 'moment';
 
-const HomeSceen = () => {
-  // const [email, onChangeEmail] = React.useState();
-  // const [password, onChangePassword] = React.useState();
+const HomeScreen = ({navigation}) => {
+  moment.locale('id');
+  const time = moment().format('H:m');
+  const date = moment().format('dddd, DD MMMM YYYY');
+
+  const handleSanner = () => {
+    navigation.navigate('Scanner'); // Navigate to HomeTabs on login
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -21,8 +27,9 @@ const HomeSceen = () => {
           <Text style={[styles.textLight, {marginVertical: 15, fontSize: 15}]}>
             Hallo, Dany Adhi
           </Text>
-          <Text style={[styles.textLight, styles.clock]}>10:24</Text>
-          <Text style={styles.textLight}>Jumat, 28 Juni 2024</Text>
+          <Text style={[styles.textLight, styles.clock]}>{time}</Text>
+          {/* <Text style={styles.textLight}>Jumat, 28 Juni 2024</Text> */}
+          <Text style={styles.textLight}>{date}</Text>
         </View>
         <View style={styles.containerCard}>
           <View style={[styles.bgLight, styles.card]}>
@@ -40,7 +47,9 @@ const HomeSceen = () => {
                 </Text>
               </View>
             </View>
-            <Pressable style={[styles.bgPrimary, styles.button]}>
+            <Pressable
+              style={[styles.bgPrimary, styles.button]}
+              onPress={handleSanner}>
               <Text style={styles.textLight}>Check In</Text>
             </Pressable>
           </View>
@@ -157,4 +166,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default HomeSceen;
+export default HomeScreen;

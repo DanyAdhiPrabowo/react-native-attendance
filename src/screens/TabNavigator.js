@@ -1,6 +1,6 @@
 import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import HomeSceen from './HomeScreen';
+import HomeScreen from './HomeScreen';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import ProfileScreen from './ProfileScreen';
 
@@ -11,7 +11,7 @@ const TabNavigator = () => {
     <Tab.Navigator initialRouteName="Home">
       <Tab.Screen
         name="Home"
-        component={HomeSceen}
+        component={HomeScreen}
         options={{
           headerShown: false,
           tabBarLabel: 'Home',
