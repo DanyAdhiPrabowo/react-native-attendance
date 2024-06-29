@@ -6,27 +6,29 @@ const ProfileScreen = () => {
   return (
     <SafeAreaView style={[styles.container, {backgroundColor: 'white'}]}>
       <View style={[styles.bgPrimary, styles.contentContainer]}>
-        <View style={[styles.bgLight, styles.profilePicture]}>
+        <View style={[styles.profilePicture]}>
           <Text style={[styles.textPrimary, styles.profileText]}>D</Text>
         </View>
       </View>
 
       <View style={styles.contentContainer}>
         <View style={styles.viewProfileInfo}>
-          <Text style={styles.titleProfileInfo}>Nama</Text>
-          <Text>Dany Adhi Prabowo</Text>
+          <Text style={[styles.textDark, styles.titleProfileInfo]}>Nama</Text>
+          <Text style={styles.textDark}>Dany Adhi Prabowo</Text>
         </View>
         <View style={styles.viewProfileInfo}>
-          <Text style={styles.titleProfileInfo}>Email</Text>
-          <Text>danyadhi4149@gmail.com</Text>
+          <Text style={[styles.textDark, styles.titleProfileInfo]}>Email</Text>
+          <Text style={styles.textDark}>danyadhi4149@gmail.com</Text>
         </View>
         <View style={styles.viewProfileInfo}>
-          <Text style={styles.titleProfileInfo}>Nomor Hp</Text>
-          <Text>083161793990</Text>
+          <Text style={[styles.textDark, styles.titleProfileInfo]}>
+            Nomor Hp
+          </Text>
+          <Text style={styles.textDark}>083161793990</Text>
         </View>
         <View style={styles.viewProfileInfo}>
-          <Text style={styles.titleProfileInfo}>Alamat</Text>
-          <Text>Lubuk Linggau, Sumatera Selatan</Text>
+          <Text style={[styles.textDark, styles.titleProfileInfo]}>Alamat</Text>
+          <Text style={styles.textDark}>Lubuk Linggau, Sumatera Selatan</Text>
         </View>
       </View>
     </SafeAreaView>
@@ -46,6 +48,9 @@ const styles = StyleSheet.create({
   textLight: {
     color: '#f8f9fa',
   },
+  textDark: {
+    color: '#343a40',
+  },
   bgPrimary: {
     backgroundColor: '#2196F3',
   },
@@ -60,9 +65,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 20,
-    borderColor: '#EEEDEB',
+    borderColor: '#e6e4e3',
     borderWidth: 10,
     elevation: 20,
+    backgroundColor: '#f8f9fa',
   },
   profileText: {
     fontSize: 80,

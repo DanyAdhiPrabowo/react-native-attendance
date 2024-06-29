@@ -21,20 +21,26 @@ const LoginSceen = ({navigation}) => {
     <SafeAreaView style={styles.container}>
       <View style={styles.card}>
         <View style={styles.headerView}>
-          <Text style={styles.headerText}>Selamat Datang di APP Absensi</Text>
-          <Text style={styles.headerText}>Kantor PU Kota Bengkulu</Text>
+          <Text style={[styles.textDark, styles.headerText]}>
+            Selamat Datang di APP Absensi
+          </Text>
+          <Text style={[styles.textDark, styles.headerText]}>
+            Kantor PU Kota Bengkulu
+          </Text>
         </View>
         <View style={styles.inputView}>
           <TextInput
-            style={styles.input}
+            style={[styles.input]}
             placeholder="Masukkan Email"
+            placeholderTextColor="gray"
             onChangeText={onChangeEmail}
             value={email}
             keyboardType="email"
           />
           <TextInput
-            style={styles.input}
+            style={[styles.input]}
             placeholder="Masukkan Password"
+            placeholderTextColor="gray"
             onChangeText={onChangePassword}
             value={password}
             secureTextEntry={true}
@@ -58,6 +64,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#2196F3',
     marginTop: -50,
     flex: 1,
+  },
+  textDark: {
+    color: '#343a40',
   },
   card: {
     width: '95%',
@@ -101,7 +110,7 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: '#2196F3',
     height: 45,
-    borderColor: 'gray',
+    borderColor: '#2196F3',
     borderWidth: 1,
     borderRadius: 5,
     alignItems: 'center',

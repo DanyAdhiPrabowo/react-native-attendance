@@ -35,14 +35,22 @@ const HomeScreen = ({navigation}) => {
           <View style={[styles.bgLight, styles.card]}>
             <View style={styles.timeContainener}>
               <View style={styles.timeView}>
-                <Text>Waktu Masuk</Text>
-                <Text style={{marginTop: 10, fontWeight: 'bold', fontSize: 20}}>
+                <Text style={styles.textDark}>Waktu Masuk</Text>
+                <Text
+                  style={[
+                    styles.textDark,
+                    {marginTop: 10, fontWeight: 'bold', fontSize: 20},
+                  ]}>
                   -
                 </Text>
               </View>
               <View style={styles.timeView}>
-                <Text>Waktu Keluar</Text>
-                <Text style={{marginTop: 10, fontWeight: 'bold', fontSize: 20}}>
+                <Text style={styles.textDark}>Waktu Pulang</Text>
+                <Text
+                  style={[
+                    styles.textDark,
+                    {marginTop: 10, fontWeight: 'bold', fontSize: 20},
+                  ]}>
                   -
                 </Text>
               </View>
@@ -50,14 +58,18 @@ const HomeScreen = ({navigation}) => {
             <Pressable
               style={[styles.bgPrimary, styles.button]}
               onPress={handleSanner}>
-              <Text style={styles.textLight}>Check In</Text>
+              <Text style={styles.textLight}>Masuk</Text>
             </Pressable>
           </View>
         </View>
       </View>
       <View style={[styles.bgLight, styles.containerFlat]}>
-        <Text style={{fontSize: 15, fontWeight: 'bold', paddingBottom: 10}}>
-          Recent attendace
+        <Text
+          style={[
+            styles.textDark,
+            {fontSize: 15, fontWeight: 'bold', paddingBottom: 10},
+          ]}>
+          Data absen terbaru
         </Text>
         <FlatList
           data={dummyData}
@@ -97,6 +109,9 @@ const styles = StyleSheet.create({
   },
   textLight: {
     color: '#f8f9fa',
+  },
+  textDark: {
+    color: '#343a40',
   },
   bgPrimary: {
     backgroundColor: '#2196F3',
