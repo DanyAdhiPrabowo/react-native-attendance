@@ -1,49 +1,53 @@
+import React from 'react';
 import {StyleSheet, Text, View} from 'react-native';
 import {
   Camera,
   useCameraDevice,
-  useCameraPermission,
   useCodeScanner,
 } from 'react-native-vision-camera';
-import HomeScreen from './HomeScreen';
-import {useEffect, useRef, useState} from 'react';
+import {useEffect, useState} from 'react';
+
+const PermissionStatus = ({status}) => {
+  if (status === null) {
+    return (
+      <View style={styles.center}>
+        <Text style={[styles.textDark]}>Checking camera permission...</Text>
+      </View>
+    );
+  }
+
+  if (status === false) {
+    return (
+      <View style={styles.center}>
+        <Text style={[styles.textDark]}>Camera permission not granted</Text>
+      </View>
+    );
+  }
+
+  return null;
+};
 
 const ScannerScreen = ({navigation}) => {
-  // const [cameraPermission, setCameraPermission] = useState(null);
-  const device = useCameraDevice('back'); // Set the initial camera device
-  // const camera = useRef < Camera > null;
-  // const [capturedPhoto, setCapturedPhoto] = useState(null);
-  // const [showPreview, setShowPreview] = useState(false);
+  const [cameraPermission, setCameraPermission] = useState(null);
+  const device = useCameraDevice('back');
 
-  // const checkCameraPermission = async () => {
-  //   const status = await Camera.getCameraPermissionStatus();
-  //   console.log('status', status);
+  useEffect(() => {
+    const checkCameraPermission = async () => {
+      const status = await Camera.getCameraPermissionStatus();
 
-  //   if (status === 'granted') {
-  //     setCameraPermission(true);
-  //   } else if (status === 'notDetermined') {
-  //     const permission = await Camera.requestCameraPermission();
-  //     setCameraPermission(permission === 'authorized');
-  //   } else {
-  //     setCameraPermission(false);
-  //   }
-  // };
+      if (status === 'granted') {
+        setCameraPermission(true);
+      } else if (status === 'not-determined' || status === 'denied') {
+        const permission = await Camera.requestCameraPermission();
+        setCameraPermission(permission === 'granted');
+      } else {
+        setCameraPermission(false);
+      }
+    };
 
-  // useEffect(() => {
-  //   checkCameraPermission();
-  // }, []);
+    checkCameraPermission();
+  }, []);
 
-  // if (cameraPermission === null) {
-  //   return <Text>Checking camera permission...</Text>;
-  // } else if (!cameraPermission) {
-  //   return <Text>Camera permission not granted</Text>;
-  // }
-
-  // if (!device) {
-  //   return <Text>No camera device available</Text>;
-  // }
-
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const codeScanner = useCodeScanner({
     codeTypes: ['qr', 'ean-13'],
     onCodeScanned: codes => {
@@ -54,23 +58,37 @@ const ScannerScreen = ({navigation}) => {
   });
 
   return (
-    <View style={{flex: 1}}>
-      <Camera
-        style={StyleSheet.absoluteFill}
-        device={device}
-        isActive={true}
-        codeScanner={codeScanner}
-      />
+    <View style={styles.camera}>
+      <PermissionStatus status={cameraPermission} />
+      {cameraPermission && device && (
+        <Camera
+          style={styles.camera}
+          device={device}
+          isActive={true}
+          codeScanner={codeScanner}
+        />
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  camera: {
+    flex: 1,
+  },
   centerText: {
     flex: 1,
     fontSize: 18,
     padding: 32,
     color: '#777',
+  },
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  textDark: {
+    color: '#343a40',
   },
   textBold: {
     fontWeight: '500',

@@ -5,6 +5,7 @@ import LoginSceen from './src/screens/LoginScreen';
 import TabNavigator from './src/screens/TabNavigator';
 import ScannerScreen from './src/screens/ScannerScreen';
 import AttendaceConfirmScreen from './src/screens/AttendaceConfirm';
+import LoadingScreen from './src/screens/LoadingScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -22,6 +23,11 @@ function App() {
           name="AttendaceConfirm"
           component={AttendaceConfirmScreen}
           options={{headerTitle: 'Konfirmasi Absen'}}
+        />
+        <Stack.Screen
+          name="Loading"
+          component={LoadingScreen}
+          options={{headerShown: false}}
         />
         <Stack.Screen
           name="HomeTabs"

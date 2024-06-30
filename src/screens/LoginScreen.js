@@ -13,8 +13,7 @@ const LoginSceen = ({navigation}) => {
   const [password, onChangePassword] = React.useState();
 
   const handleLogin = () => {
-    // Simulate successful login (replace with your logic)
-    navigation.navigate('HomeTabs'); // Navigate to HomeTabs on login
+    navigation.navigate('HomeTabs');
   };
 
   return (
