@@ -20,6 +20,7 @@ const HomeScreen = ({navigation}) => {
   const [checkin, setCheckin] = useState(null);
   const [checkout, setCheckout] = useState(null);
   const [alreadyAttendace, setAlreadyAttendace] = useState(true);
+  const [historyAttendace, setHistoryAttendace] = useState([]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -39,7 +40,15 @@ const HomeScreen = ({navigation}) => {
       });
     };
 
+    const attendaceHistory = async () => {
+      await axiosInstance.get('/attendance').then(res => {
+        const data = res?.data?.data;
+        setHistoryAttendace(data);
+      });
+    };
+
     attendaceToday();
+    attendaceHistory();
     return () => clearInterval(interval);
   }, []);
 
@@ -100,21 +109,25 @@ const HomeScreen = ({navigation}) => {
           Data absen terbaru
         </Text>
         <FlatList
-          data={dummyData}
+          data={historyAttendace}
           keyExtractor={item => item.id.toString()}
           renderItem={({item}) => (
             <View style={styles.item}>
               <Text
                 style={[styles.textPrimary, {fontSize: 14, fontWeight: '800'}]}>
-                {item.date}
+                {moment(item.created_at).format('DD MMMM YYYY')}
               </Text>
               <View style={styles.row}>
                 <Text style={styles.title}>Check In</Text>
-                <Text style={styles.value}>{item.checkin}</Text>
+                <Text style={styles.value}>
+                  {item.check_in ? item.check_in.slice(0, -3) : '-'}
+                </Text>
               </View>
               <View style={styles.row}>
                 <Text style={styles.title}>Check Out</Text>
-                <Text style={styles.value}>{item.checkout}</Text>
+                <Text style={styles.value}>
+                  {item.check_out ? item.check_out.slice(0, -3) : '-'}
+                </Text>
               </View>
             </View>
           )}
