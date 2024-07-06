@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   Pressable,
   SafeAreaView,
@@ -7,13 +7,41 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import axiosInstance from '../helpers/axiosConfig';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import {ActivityIndicator} from 'react-native-paper';
 
 const LoginSceen = ({navigation}) => {
-  const [email, onChangeEmail] = React.useState();
-  const [password, onChangePassword] = React.useState();
+  const [email, onChangeEmail] = useState('adhiedit@gmail.com');
+  const [password, onChangePassword] = useState('password');
+  let [errorMessage, setErrorMessage] = useState('');
+  let [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
-    navigation.navigate('HomeTabs');
+  const handleLogin = async () => {
+    setLoading(true);
+    const payload = {
+      email,
+      password,
+    };
+    await axiosInstance
+      .post('/login', payload)
+      .then(async res => {
+        const token = res?.data?.data?.token;
+        await AsyncStorage.setItem('token', token);
+        setErrorMessage('');
+        setLoading(false);
+        navigation.navigate('HomeTabs');
+      })
+      .catch(err => {
+        setLoading(false);
+        if (err?.response?.data) {
+          console.log('here', err.response.data);
+          setErrorMessage(err.response.data.message);
+        } else {
+          setErrorMessage('Internet server error');
+        }
+      });
   };
 
   return (
@@ -28,26 +56,36 @@ const LoginSceen = ({navigation}) => {
           </Text>
         </View>
         <View style={styles.inputView}>
+          {errorMessage ? (
+            <Text style={{color: 'red'}}>{errorMessage}</Text>
+          ) : null}
           <TextInput
-            style={[styles.input]}
+            style={[styles.input, styles.textDark]}
             placeholder="Masukkan Email"
             placeholderTextColor="gray"
             onChangeText={onChangeEmail}
             value={email}
             keyboardType="email"
+            autoFocus={true}
           />
           <TextInput
-            style={[styles.input]}
+            style={[styles.input, styles.textDark]}
             placeholder="Masukkan Password"
             placeholderTextColor="gray"
             onChangeText={onChangePassword}
             value={password}
             secureTextEntry={true}
+            inlineImageLeft="search_icon"
           />
           <View style={styles.buttonView}>
-            {/* <Button onPress={() => Alert.alert('Login success')} title="Login" /> */}
             <Pressable style={styles.button} onPress={handleLogin}>
-              <Text style={styles.buttonText}>Login</Text>
+              {loading ? (
+                <Text>
+                  <ActivityIndicator color="white" />
+                </Text>
+              ) : (
+                <Text style={styles.buttonText}>Login</Text>
+              )}
             </Pressable>
           </View>
         </View>

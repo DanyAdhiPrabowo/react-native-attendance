@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, {Fragment, useEffect, useState} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import LoginSceen from './src/screens/LoginScreen';
@@ -6,34 +6,61 @@ import TabNavigator from './src/screens/TabNavigator';
 import ScannerScreen from './src/screens/ScannerScreen';
 import AttendaceConfirmScreen from './src/screens/AttendaceConfirm';
 import LoadingScreen from './src/screens/LoadingScreen';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Stack = createNativeStackNavigator();
 
 function App() {
+  const [isLoading, setIsLoading] = useState(true);
+  let [userToken, setUserToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    const checkToken = async () => {
+      try {
+        const token = await AsyncStorage.getItem('token');
+        setUserToken(token);
+      } catch (error) {
+        setUserToken(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    checkToken();
+  }, []);
+
+  if (isLoading) {
+    return null; // Optionally, you can show a loading spinner here
+  }
+
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="HomeTabs">
-        <Stack.Screen
-          name="Login"
-          component={LoginSceen}
-          options={{headerShown: false}}
-        />
-        <Stack.Screen name="Scanner" component={ScannerScreen} />
-        <Stack.Screen
-          name="AttendaceConfirm"
-          component={AttendaceConfirmScreen}
-          options={{headerTitle: 'Konfirmasi Absen'}}
-        />
-        <Stack.Screen
-          name="Loading"
-          component={LoadingScreen}
-          options={{headerShown: false}}
-        />
-        <Stack.Screen
-          name="HomeTabs"
-          component={TabNavigator}
-          options={{headerShown: false}}
-        />
+      <Stack.Navigator initialRouteName="Login">
+        {!userToken ? (
+          <Stack.Screen
+            name="Login"
+            component={LoginSceen}
+            options={{headerShown: false}}
+          />
+        ) : (
+          <Fragment>
+            <Stack.Screen
+              name="HomeTabs"
+              component={TabNavigator}
+              options={{headerShown: false}}
+            />
+            <Stack.Screen name="Scanner" component={ScannerScreen} />
+            <Stack.Screen
+              name="AttendaceConfirm"
+              component={AttendaceConfirmScreen}
+              options={{headerTitle: 'Konfirmasi Absen'}}
+            />
+            <Stack.Screen
+              name="Loading"
+              component={LoadingScreen}
+              options={{headerShown: false}}
+            />
+          </Fragment>
+        )}
       </Stack.Navigator>
     </NavigationContainer>
   );
