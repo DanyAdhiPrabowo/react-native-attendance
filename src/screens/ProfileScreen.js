@@ -20,7 +20,9 @@ const ProfileScreen = () => {
     <SafeAreaView style={[styles.container, {backgroundColor: 'white'}]}>
       <View style={[styles.bgPrimary, styles.contentContainer]}>
         <View style={[styles.profilePicture]}>
-          <Text style={[styles.textPrimary, styles.profileText]}>D</Text>
+          <Text style={[styles.textPrimary, styles.profileText]}>
+            {dataProfile.name ? dataProfile.name.charAt(0).toUpperCase() : '-'}
+          </Text>
         </View>
       </View>
 
