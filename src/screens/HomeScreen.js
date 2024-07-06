@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   FlatList,
   Pressable,
@@ -9,11 +9,33 @@ import {
 } from 'react-native';
 import dummyData from '../data.json';
 import moment from 'moment';
+import axiosInstance from '../helpers/axiosConfig';
 
 const HomeScreen = ({navigation}) => {
   moment.locale('id');
-  const time = moment().format('H:m');
-  const date = moment().format('dddd, DD MMMM YYYY');
+
+  const [time, setTime] = useState(moment().format('H:m'));
+  const [date, setDate] = useState(moment().format('dddd, DD MMMM YYYY'));
+  const [checkin, setCheckin] = useState(null);
+  const [checkout, setCheckout] = useState(null);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTime(moment().format('H:m'));
+      setDate(moment().format('dddd, DD MMMM YYYY'));
+    });
+
+    const attendaceToday = async () => {
+      await axiosInstance.get('/attendance/today').then(res => {
+        const data = res?.data?.data;
+        setCheckin(data?.check_in);
+        setCheckout(data?.check_out);
+      });
+    };
+
+    attendaceToday();
+    return () => clearInterval(interval);
+  }, []);
 
   const handleSanner = () => {
     navigation.navigate('Scanner'); // Navigate to HomeTabs on login
@@ -28,7 +50,6 @@ const HomeScreen = ({navigation}) => {
             Hallo, Dany Adhi
           </Text>
           <Text style={[styles.textLight, styles.clock]}>{time}</Text>
-          {/* <Text style={styles.textLight}>Jumat, 28 Juni 2024</Text> */}
           <Text style={styles.textLight}>{date}</Text>
         </View>
         <View style={styles.containerCard}>
@@ -36,22 +57,14 @@ const HomeScreen = ({navigation}) => {
             <View style={styles.timeContainener}>
               <View style={styles.timeView}>
                 <Text style={styles.textDark}>Waktu Masuk</Text>
-                <Text
-                  style={[
-                    styles.textDark,
-                    {marginTop: 10, fontWeight: 'bold', fontSize: 20},
-                  ]}>
-                  -
+                <Text style={[styles.textDark, styles.time]}>
+                  {checkin ? checkin.slice(0, -3) : '-'}
                 </Text>
               </View>
               <View style={styles.timeView}>
                 <Text style={styles.textDark}>Waktu Pulang</Text>
-                <Text
-                  style={[
-                    styles.textDark,
-                    {marginTop: 10, fontWeight: 'bold', fontSize: 20},
-                  ]}>
-                  -
+                <Text style={[styles.textDark, styles.time]}>
+                  {checkout ? checkout.slice(0, -3) : '-'}
                 </Text>
               </View>
             </View>
@@ -149,6 +162,11 @@ const styles = StyleSheet.create({
   timeView: {
     width: '50%',
     alignItems: 'center',
+  },
+  time: {
+    marginTop: 10,
+    fontWeight: 'bold',
+    fontSize: 20,
   },
   button: {
     height: 45,
