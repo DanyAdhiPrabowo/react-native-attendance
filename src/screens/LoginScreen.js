@@ -36,7 +36,6 @@ const LoginSceen = ({navigation}) => {
       .catch(err => {
         setLoading(false);
         if (err?.response?.data) {
-          console.log('here', err.response.data);
           setErrorMessage(err.response.data.message);
         } else {
           setErrorMessage('Internet server error');
