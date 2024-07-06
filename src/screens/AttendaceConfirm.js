@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Geolocation from 'react-native-geolocation-service';
+import axiosInstance from '../helpers/axiosConfig';
 
 const requestLocationPermission = async () => {
   try {
@@ -27,9 +28,10 @@ const requestLocationPermission = async () => {
 };
 
 const AttendaceConfirmScreen = ({navigation}) => {
-  const time = moment().format('H:m');
-  const [location, setLocation] = useState(false);
+  const time = moment().format('H:mm');
   const [displayLocation, setDisplayLocation] = useState('');
+  let [errorMessage, setErrorMessage] = useState('');
+  let [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const getLocation = () => {
@@ -41,7 +43,7 @@ const AttendaceConfirmScreen = ({navigation}) => {
               fetchCity(position.coords.latitude, position.coords.longitude);
             },
             error => {
-              setLocation(false);
+              setDisplayLocation('');
             },
             {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
           );
@@ -64,8 +66,27 @@ const AttendaceConfirmScreen = ({navigation}) => {
     }
   };
 
-  const confirm = () => {
-    navigation.navigate('HomeTabs');
+  const confirm = async () => {
+    setLoading(true);
+    const payload = {
+      time,
+      location: displayLocation,
+    };
+
+    await axiosInstance
+      .post('/attendance', payload)
+      .then(() => {
+        navigation.navigate('HomeTabs');
+      })
+      .catch(err => {
+        console.log(err);
+        if (err?.response?.data) {
+          setErrorMessage(err.response.data.message);
+        } else {
+          setErrorMessage('Internet server error');
+        }
+      });
+    setLoading(false);
   };
 
   return (
@@ -98,7 +119,13 @@ const AttendaceConfirmScreen = ({navigation}) => {
           </View>
           <View style={styles.buttonView}>
             <Pressable style={styles.button} onPress={confirm}>
-              <Text style={styles.buttonText}>Kirim</Text>
+              {loading ? (
+                <Text>
+                  <ActivityIndicator color="white" />
+                </Text>
+              ) : (
+                <Text style={styles.buttonText}>Kirim</Text>
+              )}
             </Pressable>
           </View>
         </View>

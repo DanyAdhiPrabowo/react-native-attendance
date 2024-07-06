@@ -5,6 +5,7 @@ import {
   SafeAreaView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import dummyData from '../data.json';
@@ -18,10 +19,11 @@ const HomeScreen = ({navigation}) => {
   const [date, setDate] = useState(moment().format('dddd, DD MMMM YYYY'));
   const [checkin, setCheckin] = useState(null);
   const [checkout, setCheckout] = useState(null);
+  const [alreadyAttendace, setAlreadyAttendace] = useState(true);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setTime(moment().format('H:m'));
+      setTime(moment().format('H:mm'));
       setDate(moment().format('dddd, DD MMMM YYYY'));
     });
 
@@ -29,7 +31,11 @@ const HomeScreen = ({navigation}) => {
       await axiosInstance.get('/attendance/today').then(res => {
         const data = res?.data?.data;
         setCheckin(data?.check_in);
-        setCheckout(data?.check_out);
+        const dataCheckout = data?.check_out;
+        if (!dataCheckout) {
+          setAlreadyAttendace(false);
+        }
+        setCheckout(dataCheckout);
       });
     };
 
@@ -68,11 +74,20 @@ const HomeScreen = ({navigation}) => {
                 </Text>
               </View>
             </View>
-            <Pressable
-              style={[styles.bgPrimary, styles.button]}
-              onPress={handleSanner}>
-              <Text style={styles.textLight}>Masuk</Text>
-            </Pressable>
+            <TouchableOpacity
+              style={
+                alreadyAttendace
+                  ? styles.buttonDisable
+                  : [styles.bgPrimary, styles.button]
+              }
+              onPress={handleSanner}
+              disabled={alreadyAttendace ? true : false}>
+              {alreadyAttendace ? (
+                <Text style={styles.textDark}>Masuk</Text>
+              ) : (
+                <Text style={styles.textLight}>Masuk</Text>
+              )}
+            </TouchableOpacity>
           </View>
         </View>
       </View>
@@ -110,6 +125,15 @@ const HomeScreen = ({navigation}) => {
 };
 
 const styles = StyleSheet.create({
+  buttonDisable: {
+    height: 45,
+    borderWidth: 1,
+    borderRadius: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#c9c9c9',
+    borderColor: '#c9c9c9',
+  },
   container: {
     flex: 1,
   },
