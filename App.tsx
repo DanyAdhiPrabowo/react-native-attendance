@@ -17,7 +17,7 @@ function App() {
   useEffect(() => {
     const checkToken = async () => {
       try {
-        const token = await AsyncStorage.getItem('token');
+        const token = await AsyncStorage.getItem('userToken');
         setUserToken(token);
       } catch (error) {
         setUserToken(null);

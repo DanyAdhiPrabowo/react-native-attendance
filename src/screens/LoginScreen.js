@@ -28,10 +28,10 @@ const LoginSceen = ({navigation}) => {
       .post('/login', payload)
       .then(async res => {
         const token = res?.data?.data?.token;
-        await AsyncStorage.setItem('token', token);
+        await AsyncStorage.setItem('userToken', token);
         setErrorMessage('');
         setLoading(false);
-        navigation.navigate('HomeTabs');
+        navigation.navigate('HomeTabs', {screen: 'Home'});
       })
       .catch(err => {
         setLoading(false);
