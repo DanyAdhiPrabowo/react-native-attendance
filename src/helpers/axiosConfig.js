@@ -29,7 +29,7 @@ axiosInstance.interceptors.request.use(
 // Add a response interceptor
 axiosInstance.interceptors.response.use(
   async response => {
-    if (response.data.status === 'response Token is Invalid') {
+    if (response.data.status === 'Token is Expired') {
       await AsyncStorage.removeItem('userToken');
     }
     return response;
