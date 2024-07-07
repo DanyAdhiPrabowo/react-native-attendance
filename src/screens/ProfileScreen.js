@@ -3,7 +3,7 @@ import {Alert, SafeAreaView, StyleSheet, Text, View} from 'react-native';
 import axiosInstance from '../helpers/axiosConfig';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {CommonActions} from '@react-navigation/native';
+import {CommonActions, useFocusEffect} from '@react-navigation/native';
 import {
   Menu,
   MenuOption,
@@ -16,17 +16,29 @@ const ProfileScreen = ({navigation}) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [dataProfile, setDataProfile] = useState([]);
   const [errorMessage, setErrorMessage] = useState('');
+  const [menuOpened, setMenuOpened] = useState(false);
 
-  useEffect(() => {
-    const getProfile = async () => {
-      await axiosInstance.get('/profile').then(res => {
-        const data = res?.data?.data;
-        setDataProfile(data);
-      });
-    };
+  const getProfile = async () => {
+    await axiosInstance.get('/profile').then(res => {
+      const data = res?.data?.data;
+      setDataProfile(data);
+    });
+  };
 
-    getProfile();
-  }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      getProfile();
+    }, []),
+  );
+
+  const handleUpdateProfile = () => {
+    handleMenuOpened();
+    navigation.navigate('UpdateProfile');
+  };
+
+  const handleMenuOpened = () => {
+    setMenuOpened(!menuOpened);
+  };
 
   const handleLogout = () =>
     Alert.alert('Keluar', 'Apakah anda yakin ingin keluar?', [
@@ -65,8 +77,12 @@ const ProfileScreen = ({navigation}) => {
     <MenuProvider>
       <SafeAreaView style={[styles.container, {backgroundColor: 'white'}]}>
         <View style={[styles.bgPrimary, styles.contentContainer]}>
-          <Menu style={[styles.cogButton]}>
-            <MenuTrigger>
+          <Menu
+            style={[styles.cogButton]}
+            opened={menuOpened}
+            onBackdropPress={handleMenuOpened}
+            onSelect={handleMenuOpened}>
+            <MenuTrigger onPress={handleMenuOpened}>
               <MaterialCommunityIcons
                 name="cog"
                 color="white"
@@ -80,7 +96,7 @@ const ProfileScreen = ({navigation}) => {
               <MenuOption>
                 <Text
                   style={[styles.textDark, styles.menuText]}
-                  onPress={() => setModalVisible(!modalVisible)}>
+                  onPress={handleUpdateProfile}>
                   <MaterialCommunityIcons name="account-cog" size={15} />
                   &nbsp; Update Profile
                 </Text>
