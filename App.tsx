@@ -8,6 +8,7 @@ import AttendaceConfirmScreen from './src/screens/AttendaceConfirm';
 import LoadingScreen from './src/screens/LoadingScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import UpdateProfileScreen from './src/screens/UpdateProfileScreen';
+import ChangePasswordScreen from './src/screens/ChangePasswordScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -61,6 +62,11 @@ function App() {
           name="UpdateProfile"
           component={UpdateProfileScreen}
           options={{headerTitle: 'Update Profile'}}
+        />
+        <Stack.Screen
+          name="ChangePassword"
+          component={ChangePasswordScreen}
+          options={{headerTitle: 'Ganti Password'}}
         />
       </Stack.Navigator>
     </NavigationContainer>

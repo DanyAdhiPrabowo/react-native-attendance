@@ -36,6 +36,11 @@ const ProfileScreen = ({navigation}) => {
     navigation.navigate('UpdateProfile');
   };
 
+  const handleChangePassword = () => {
+    handleMenuOpened();
+    navigation.navigate('ChangePassword');
+  };
+
   const handleMenuOpened = () => {
     setMenuOpened(!menuOpened);
   };
@@ -104,7 +109,7 @@ const ProfileScreen = ({navigation}) => {
               <MenuOption>
                 <Text
                   style={[styles.textDark, styles.menuText]}
-                  onPress={() => setModalVisible(!modalVisible)}>
+                  onPress={handleChangePassword}>
                   <MaterialCommunityIcons name="account-lock" size={15} />
                   &nbsp; Ganti Password
                 </Text>
