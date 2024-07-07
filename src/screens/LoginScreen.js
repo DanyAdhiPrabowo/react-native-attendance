@@ -9,9 +9,9 @@ import {
 } from 'react-native';
 import axiosInstance from '../helpers/axiosConfig';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import {ActivityIndicator} from 'react-native';
 import {CommonActions} from '@react-navigation/native';
+import DangerAlertComponent from '../components/DangerAlertComponent';
 
 const LoginSceen = ({navigation}) => {
   const [email, onChangeEmail] = useState('adhiedit@gmail.com');
@@ -31,7 +31,6 @@ const LoginSceen = ({navigation}) => {
         const token = res?.data?.data?.token;
         await AsyncStorage.setItem('userToken', token);
         setErrorMessage('');
-        setLoading(false);
         navigation.dispatch(
           CommonActions.reset({
             index: 0,
@@ -40,13 +39,22 @@ const LoginSceen = ({navigation}) => {
         );
       })
       .catch(err => {
-        setLoading(false);
         if (err?.response?.data) {
-          setErrorMessage(err.response.data.message);
+          const message = err.response.data.message;
+          if (typeof message === 'string') {
+            setErrorMessage(message);
+          } else if (typeof message === 'object') {
+            const key = Object.keys(message)[0];
+            const result = message[key];
+            setErrorMessage(result);
+          } else {
+            setErrorMessage('Internet server error');
+          }
         } else {
           setErrorMessage('Internet server error');
         }
       });
+    setLoading(false);
   };
 
   return (
@@ -62,7 +70,7 @@ const LoginSceen = ({navigation}) => {
         </View>
         <View style={styles.inputView}>
           {errorMessage ? (
-            <Text style={{color: 'red'}}>{errorMessage}</Text>
+            <DangerAlertComponent message={errorMessage} />
           ) : null}
           <TextInput
             style={[styles.input, styles.textDark]}
