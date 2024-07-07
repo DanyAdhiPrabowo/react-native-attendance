@@ -10,7 +10,8 @@ import {
 import axiosInstance from '../helpers/axiosConfig';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {ActivityIndicator} from 'react-native-paper';
+import {ActivityIndicator} from 'react-native';
+import {CommonActions} from '@react-navigation/native';
 
 const LoginSceen = ({navigation}) => {
   const [email, onChangeEmail] = useState('adhiedit@gmail.com');
@@ -31,7 +32,12 @@ const LoginSceen = ({navigation}) => {
         await AsyncStorage.setItem('userToken', token);
         setErrorMessage('');
         setLoading(false);
-        navigation.navigate('HomeTabs', {screen: 'Home'});
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{name: 'HomeTabs'}],
+          }),
+        );
       })
       .catch(err => {
         setLoading(false);
