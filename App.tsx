@@ -1,4 +1,4 @@
-import React, {Fragment, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import LoginSceen from './src/screens/LoginScreen';
@@ -34,33 +34,28 @@ function App() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Login">
-        {!userToken ? (
-          <Stack.Screen
-            name="Login"
-            component={LoginSceen}
-            options={{headerShown: false}}
-          />
-        ) : (
-          <Fragment>
-            <Stack.Screen
-              name="HomeTabs"
-              component={TabNavigator}
-              options={{headerShown: false}}
-            />
-            <Stack.Screen name="Scanner" component={ScannerScreen} />
-            <Stack.Screen
-              name="AttendaceConfirm"
-              component={AttendaceConfirmScreen}
-              options={{headerTitle: 'Konfirmasi Absen'}}
-            />
-            <Stack.Screen
-              name="Loading"
-              component={LoadingScreen}
-              options={{headerShown: false}}
-            />
-          </Fragment>
-        )}
+      <Stack.Navigator initialRouteName={userToken ? 'HomeTabs' : 'Login'}>
+        <Stack.Screen
+          name="Login"
+          component={LoginSceen}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="HomeTabs"
+          component={TabNavigator}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen name="Scanner" component={ScannerScreen} />
+        <Stack.Screen
+          name="AttendaceConfirm"
+          component={AttendaceConfirmScreen}
+          options={{headerTitle: 'Konfirmasi Absen'}}
+        />
+        <Stack.Screen
+          name="Loading"
+          component={LoadingScreen}
+          options={{headerShown: false}}
+        />
       </Stack.Navigator>
     </NavigationContainer>
   );
