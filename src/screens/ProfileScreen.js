@@ -1,9 +1,21 @@
 import React, {useEffect, useState} from 'react';
-import {SafeAreaView, StyleSheet, Text, View} from 'react-native';
+import {Alert, SafeAreaView, StyleSheet, Text, View} from 'react-native';
 import axiosInstance from '../helpers/axiosConfig';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {CommonActions} from '@react-navigation/native';
+import {
+  Menu,
+  MenuOption,
+  MenuOptions,
+  MenuProvider,
+  MenuTrigger,
+} from 'react-native-popup-menu';
 
-const ProfileScreen = () => {
+const ProfileScreen = ({navigation}) => {
+  const [modalVisible, setModalVisible] = useState(false);
   const [dataProfile, setDataProfile] = useState([]);
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     const getProfile = async () => {
@@ -16,37 +28,116 @@ const ProfileScreen = () => {
     getProfile();
   }, []);
 
-  return (
-    <SafeAreaView style={[styles.container, {backgroundColor: 'white'}]}>
-      <View style={[styles.bgPrimary, styles.contentContainer]}>
-        <View style={[styles.profilePicture]}>
-          <Text style={[styles.textPrimary, styles.profileText]}>
-            {dataProfile.name ? dataProfile.name.charAt(0).toUpperCase() : '-'}
-          </Text>
-        </View>
-      </View>
+  const handleLogout = () =>
+    Alert.alert('Keluar', 'Apakah anda yakin ingin keluar?', [
+      {text: 'Batal'},
+      {
+        text: 'Ya',
+        onPress: () => {
+          setModalVisible(!modalVisible);
+          logout();
+        },
+      },
+    ]);
 
-      <View style={styles.contentContainer}>
-        <View style={styles.viewProfileInfo}>
-          <Text style={[styles.textDark, styles.titleProfileInfo]}>Nama</Text>
-          <Text style={styles.textDark}>{dataProfile.name ?? '-'}</Text>
+  const logout = async () => {
+    await axiosInstance
+      .post('/logout')
+      .then(async () => {
+        await AsyncStorage.removeItem('userToken');
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{name: 'Login'}],
+          }),
+        );
+      })
+      .catch(err => {
+        if (err?.response?.data) {
+          setErrorMessage(err.response.data.message);
+        } else {
+          setErrorMessage('Internet server error');
+        }
+      });
+  };
+
+  return (
+    <MenuProvider>
+      <SafeAreaView style={[styles.container, {backgroundColor: 'white'}]}>
+        <View style={[styles.bgPrimary, styles.contentContainer]}>
+          <Menu style={[styles.cogButton]}>
+            <MenuTrigger>
+              <MaterialCommunityIcons
+                name="cog"
+                color="white"
+                size={25}
+                style={{}}
+              />
+            </MenuTrigger>
+            <MenuOptions
+              optionsContainerStyle={{marginTop: 30}}
+              style={{padding: 5}}>
+              <MenuOption>
+                <Text
+                  style={[styles.textDark, styles.menuText]}
+                  onPress={() => setModalVisible(!modalVisible)}>
+                  <MaterialCommunityIcons name="account-cog" size={15} />
+                  &nbsp; Update Profile
+                </Text>
+              </MenuOption>
+              <MenuOption>
+                <Text
+                  style={[styles.textDark, styles.menuText]}
+                  onPress={() => setModalVisible(!modalVisible)}>
+                  <MaterialCommunityIcons name="account-lock" size={15} />
+                  &nbsp; Ganti Password
+                </Text>
+              </MenuOption>
+              <MenuOption>
+                <Text
+                  style={[styles.textDark, styles.menuText]}
+                  onPress={handleLogout}>
+                  <MaterialCommunityIcons name="logout" size={15} />
+                  &nbsp; Logout
+                </Text>
+              </MenuOption>
+            </MenuOptions>
+          </Menu>
+
+          <View style={[styles.profilePicture]}>
+            <Text style={[styles.textPrimary, styles.profileText]}>
+              {dataProfile.name
+                ? dataProfile.name.charAt(0).toUpperCase()
+                : '-'}
+            </Text>
+          </View>
         </View>
-        <View style={styles.viewProfileInfo}>
-          <Text style={[styles.textDark, styles.titleProfileInfo]}>Email</Text>
-          <Text style={styles.textDark}>{dataProfile.email ?? '-'}</Text>
+        <View style={styles.contentContainer}>
+          <View style={styles.viewProfileInfo}>
+            <Text style={[styles.textDark, styles.titleProfileInfo]}>Nama</Text>
+            <Text style={styles.textDark}>{dataProfile.name ?? '-'}</Text>
+          </View>
+          <View style={styles.viewProfileInfo}>
+            <Text style={[styles.textDark, styles.titleProfileInfo]}>
+              Email
+            </Text>
+            <Text style={styles.textDark}>{dataProfile.email ?? '-'}</Text>
+          </View>
+          <View style={styles.viewProfileInfo}>
+            <Text style={[styles.textDark, styles.titleProfileInfo]}>
+              Nomor Hp
+            </Text>
+            <Text style={styles.textDark}>{dataProfile.handphone ?? '-'}</Text>
+          </View>
+          <View style={styles.viewProfileInfo}>
+            <Text style={[styles.textDark, styles.titleProfileInfo]}>
+              Alamat
+            </Text>
+            <Text style={styles.textDark}>{dataProfile.address ?? '-'}</Text>
+          </View>
         </View>
-        <View style={styles.viewProfileInfo}>
-          <Text style={[styles.textDark, styles.titleProfileInfo]}>
-            Nomor Hp
-          </Text>
-          <Text style={styles.textDark}>{dataProfile.handphone ?? '-'}</Text>
-        </View>
-        <View style={styles.viewProfileInfo}>
-          <Text style={[styles.textDark, styles.titleProfileInfo]}>Alamat</Text>
-          <Text style={styles.textDark}>{dataProfile.address ?? '-'}</Text>
-        </View>
-      </View>
-    </SafeAreaView>
+      </SafeAreaView>
+    </MenuProvider>
   );
 };
 
@@ -72,6 +163,11 @@ const styles = StyleSheet.create({
   bgLight: {
     backgroundColor: '#f8f9fa',
   },
+  cogButton: {
+    marginLeft: 'auto',
+    marginTop: -15,
+    marginRight: -10,
+  },
   profilePicture: {
     width: 150,
     height: 150,
@@ -94,6 +190,9 @@ const styles = StyleSheet.create({
   },
   titleProfileInfo: {
     fontWeight: 'bold',
+  },
+  menuText: {
+    marginVertical: 10,
   },
 });
 
