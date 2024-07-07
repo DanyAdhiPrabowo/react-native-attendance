@@ -7,6 +7,7 @@ import ScannerScreen from './src/screens/ScannerScreen';
 import AttendaceConfirmScreen from './src/screens/AttendaceConfirm';
 import LoadingScreen from './src/screens/LoadingScreen';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import UpdateProfileScreen from './src/screens/UpdateProfileScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -55,6 +56,11 @@ function App() {
           name="Loading"
           component={LoadingScreen}
           options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name="UpdateProfile"
+          component={UpdateProfileScreen}
+          options={{headerTitle: 'Update Profile'}}
         />
       </Stack.Navigator>
     </NavigationContainer>
