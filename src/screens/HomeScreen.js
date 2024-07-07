@@ -1,14 +1,12 @@
 import React, {useEffect, useState} from 'react';
 import {
   FlatList,
-  Pressable,
   SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import dummyData from '../data.json';
 import moment from 'moment';
 import axiosInstance from '../helpers/axiosConfig';
 
