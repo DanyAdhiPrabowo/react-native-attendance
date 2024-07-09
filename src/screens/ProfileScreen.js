@@ -127,8 +127,8 @@ const ProfileScreen = ({navigation}) => {
 
           <View style={[styles.profilePicture]}>
             <Text style={[styles.textPrimary, styles.profileText]}>
-              {dataProfile.name
-                ? dataProfile.name.charAt(0).toUpperCase()
+              {dataProfile?.name
+                ? dataProfile?.name.charAt(0).toUpperCase()
                 : '-'}
             </Text>
           </View>
@@ -136,25 +136,25 @@ const ProfileScreen = ({navigation}) => {
         <View style={styles.contentContainer}>
           <View style={styles.viewProfileInfo}>
             <Text style={[styles.textDark, styles.titleProfileInfo]}>Nama</Text>
-            <Text style={styles.textDark}>{dataProfile.name ?? '-'}</Text>
+            <Text style={styles.textDark}>{dataProfile?.name ?? '-'}</Text>
           </View>
           <View style={styles.viewProfileInfo}>
             <Text style={[styles.textDark, styles.titleProfileInfo]}>
               Email
             </Text>
-            <Text style={styles.textDark}>{dataProfile.email ?? '-'}</Text>
+            <Text style={styles.textDark}>{dataProfile?.email ?? '-'}</Text>
           </View>
           <View style={styles.viewProfileInfo}>
             <Text style={[styles.textDark, styles.titleProfileInfo]}>
               Nomor Hp
             </Text>
-            <Text style={styles.textDark}>{dataProfile.handphone ?? '-'}</Text>
+            <Text style={styles.textDark}>{dataProfile?.handphone ?? '-'}</Text>
           </View>
           <View style={styles.viewProfileInfo}>
             <Text style={[styles.textDark, styles.titleProfileInfo]}>
               Alamat
             </Text>
-            <Text style={styles.textDark}>{dataProfile.address ?? '-'}</Text>
+            <Text style={styles.textDark}>{dataProfile?.address ?? '-'}</Text>
           </View>
         </View>
       </SafeAreaView>

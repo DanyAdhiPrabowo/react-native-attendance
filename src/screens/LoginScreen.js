@@ -14,8 +14,8 @@ import {CommonActions} from '@react-navigation/native';
 import DangerAlertComponent from '../components/DangerAlertComponent';
 
 const LoginSceen = ({navigation}) => {
-  const [email, onChangeEmail] = useState('adhiedit@gmail.com');
-  const [password, onChangePassword] = useState('password');
+  const [email, onChangeEmail] = useState('');
+  const [password, onChangePassword] = useState('');
   let [errorMessage, setErrorMessage] = useState('');
   let [loading, setLoading] = useState(false);
 

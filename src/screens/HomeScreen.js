@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import moment from 'moment';
 import axiosInstance from '../helpers/axiosConfig';
+import {useFocusEffect} from '@react-navigation/native';
 
 const HomeScreen = ({navigation}) => {
   moment.locale('id');
@@ -17,8 +18,41 @@ const HomeScreen = ({navigation}) => {
   const [date, setDate] = useState(moment().format('dddd, DD MMMM YYYY'));
   const [checkin, setCheckin] = useState(null);
   const [checkout, setCheckout] = useState(null);
-  const [alreadyAttendace, setAlreadyAttendace] = useState(true);
+  const [alreadyCheckin, setAlreadyChekin] = useState(false);
+  const [alreadyCheckout, setAlreadyChekout] = useState(true);
   const [historyAttendace, setHistoryAttendace] = useState([]);
+  const [dataProfile, setDataProfile] = useState([]);
+
+  const getProfile = async () => {
+    await axiosInstance.get('/profile').then(res => {
+      const data = res?.data?.data;
+      setDataProfile(data);
+    });
+  };
+
+  const attendaceToday = async () => {
+    await axiosInstance.get('/attendance/today').then(res => {
+      const data = res?.data?.data;
+      setCheckin(data?.check_in);
+      const dataCheckin = data?.check_in;
+      const dataCheckout = data?.check_out;
+      if (!dataCheckout) {
+        // setAlreadyAttendace(false);
+        setAlreadyChekout(false);
+      }
+      if (dataCheckin) {
+        setAlreadyChekin(true);
+      }
+      setCheckout(dataCheckout);
+    });
+  };
+
+  const attendaceHistory = async () => {
+    await axiosInstance.get('/attendance').then(res => {
+      const data = res?.data?.data;
+      setHistoryAttendace(data);
+    });
+  };
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -26,29 +60,17 @@ const HomeScreen = ({navigation}) => {
       setDate(moment().format('dddd, DD MMMM YYYY'));
     });
 
-    const attendaceToday = async () => {
-      await axiosInstance.get('/attendance/today').then(res => {
-        const data = res?.data?.data;
-        setCheckin(data?.check_in);
-        const dataCheckout = data?.check_out;
-        if (!dataCheckout) {
-          setAlreadyAttendace(false);
-        }
-        setCheckout(dataCheckout);
-      });
-    };
-
-    const attendaceHistory = async () => {
-      await axiosInstance.get('/attendance').then(res => {
-        const data = res?.data?.data;
-        setHistoryAttendace(data);
-      });
-    };
-
     attendaceToday();
-    attendaceHistory();
     return () => clearInterval(interval);
   }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      getProfile();
+      attendaceToday();
+      attendaceHistory();
+    }, []),
+  );
 
   const handleSanner = () => {
     navigation.navigate('Scanner'); // Navigate to HomeTabs on login
@@ -60,7 +82,7 @@ const HomeScreen = ({navigation}) => {
         <View style={[styles.bgPrimary, styles.background]} />
         <View style={styles.center}>
           <Text style={[styles.textLight, {marginVertical: 15, fontSize: 15}]}>
-            Hallo, Dany Adhi
+            Hallo, {dataProfile?.name ? dataProfile.name : '-'}
           </Text>
           <Text style={[styles.textLight, styles.clock]}>{time}</Text>
           <Text style={styles.textLight}>{date}</Text>
@@ -83,16 +105,18 @@ const HomeScreen = ({navigation}) => {
             </View>
             <TouchableOpacity
               style={
-                alreadyAttendace
+                alreadyCheckout
                   ? styles.buttonDisable
                   : [styles.bgPrimary, styles.button]
               }
               onPress={handleSanner}
-              disabled={alreadyAttendace ? true : false}>
-              {alreadyAttendace ? (
+              disabled={alreadyCheckout ? true : false}>
+              {alreadyCheckout ? (
                 <Text style={styles.textDark}>Masuk</Text>
               ) : (
-                <Text style={styles.textLight}>Masuk</Text>
+                <Text style={styles.textLight}>
+                  {alreadyCheckin === true ? 'Pulang' : 'Masuk'}
+                </Text>
               )}
             </TouchableOpacity>
           </View>
@@ -116,13 +140,13 @@ const HomeScreen = ({navigation}) => {
                 {moment(item.created_at).format('DD MMMM YYYY')}
               </Text>
               <View style={styles.row}>
-                <Text style={styles.title}>Check In</Text>
+                <Text style={styles.title}>Masuk</Text>
                 <Text style={styles.value}>
                   {item.check_in ? item.check_in.slice(0, -3) : '-'}
                 </Text>
               </View>
               <View style={styles.row}>
-                <Text style={styles.title}>Check Out</Text>
+                <Text style={styles.title}>Pulang</Text>
                 <Text style={styles.value}>
                   {item.check_out ? item.check_out.slice(0, -3) : '-'}
                 </Text>
