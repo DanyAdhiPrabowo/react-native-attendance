@@ -1,5 +1,13 @@
-import React, {useEffect, useState} from 'react';
-import {Alert, SafeAreaView, StyleSheet, Text, View} from 'react-native';
+import React, {useState} from 'react';
+import {
+  Alert,
+  RefreshControl,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import axiosInstance from '../helpers/axiosConfig';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -11,18 +19,30 @@ import {
   MenuProvider,
   MenuTrigger,
 } from 'react-native-popup-menu';
+import Toast from 'react-native-toast-message';
+import LoadingScreen from './LoadingScreen';
 
 const ProfileScreen = ({navigation}) => {
+  const [refreshing, setRefreshing] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [dataProfile, setDataProfile] = useState([]);
-  const [errorMessage, setErrorMessage] = useState('');
   const [menuOpened, setMenuOpened] = useState(false);
+  let [loading, setLoading] = useState(false);
+
+  const showToast = message => {
+    Toast.show({
+      type: 'error',
+      text1: message,
+    });
+  };
 
   const getProfile = async () => {
+    setLoading(true);
     await axiosInstance.get('/profile').then(res => {
       const data = res?.data?.data;
       setDataProfile(data);
     });
+    setLoading(false);
   };
 
   useFocusEffect(
@@ -30,6 +50,11 @@ const ProfileScreen = ({navigation}) => {
       getProfile();
     }, []),
   );
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(false);
+    getProfile();
+  }, []);
 
   const handleUpdateProfile = () => {
     handleMenuOpened();
@@ -71,93 +96,115 @@ const ProfileScreen = ({navigation}) => {
       })
       .catch(err => {
         if (err?.response?.data) {
-          setErrorMessage(err.response.data.message);
+          showToast(err.response.data.message);
         } else {
-          setErrorMessage('Internet server error');
+          showToast('Internet server error');
         }
       });
   };
 
   return (
     <MenuProvider>
-      <SafeAreaView style={[styles.container, {backgroundColor: 'white'}]}>
-        <View style={[styles.bgPrimary, styles.contentContainer]}>
-          <Menu
-            style={[styles.cogButton]}
-            opened={menuOpened}
-            onBackdropPress={handleMenuOpened}
-            onSelect={handleMenuOpened}>
-            <MenuTrigger onPress={handleMenuOpened}>
-              <MaterialCommunityIcons
-                name="cog"
-                color="white"
-                size={25}
-                style={{}}
-              />
-            </MenuTrigger>
-            <MenuOptions
-              optionsContainerStyle={{marginTop: 30}}
-              style={{padding: 5}}>
-              <MenuOption>
-                <Text
-                  style={[styles.textDark, styles.menuText]}
-                  onPress={handleUpdateProfile}>
-                  <MaterialCommunityIcons name="account-cog" size={15} />
-                  &nbsp; Update Profile
-                </Text>
-              </MenuOption>
-              <MenuOption>
-                <Text
-                  style={[styles.textDark, styles.menuText]}
-                  onPress={handleChangePassword}>
-                  <MaterialCommunityIcons name="account-lock" size={15} />
-                  &nbsp; Ganti Password
-                </Text>
-              </MenuOption>
-              <MenuOption>
-                <Text
-                  style={[styles.textDark, styles.menuText]}
-                  onPress={handleLogout}>
-                  <MaterialCommunityIcons name="logout" size={15} />
-                  &nbsp; Logout
-                </Text>
-              </MenuOption>
-            </MenuOptions>
-          </Menu>
+      {loading ? (
+        <LoadingScreen />
+      ) : (
+        <SafeAreaView style={[styles.container, {backgroundColor: 'white'}]}>
+          <ScrollView
+            refreshControl={
+              <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            }>
+            <>
+              <View style={[styles.bgPrimary, styles.contentContainer]}>
+                <Menu
+                  style={[styles.cogButton]}
+                  opened={menuOpened}
+                  onBackdropPress={handleMenuOpened}
+                  onSelect={handleMenuOpened}>
+                  <MenuTrigger onPress={handleMenuOpened}>
+                    <MaterialCommunityIcons
+                      name="cog"
+                      color="white"
+                      size={25}
+                      style={{}}
+                    />
+                  </MenuTrigger>
+                  <MenuOptions
+                    optionsContainerStyle={{marginTop: 30}}
+                    style={{padding: 5}}>
+                    <MenuOption>
+                      <Text
+                        style={[styles.textDark, styles.menuText]}
+                        onPress={handleUpdateProfile}>
+                        <MaterialCommunityIcons name="account-cog" size={15} />
+                        &nbsp; Update Profile
+                      </Text>
+                    </MenuOption>
+                    <MenuOption>
+                      <Text
+                        style={[styles.textDark, styles.menuText]}
+                        onPress={handleChangePassword}>
+                        <MaterialCommunityIcons name="account-lock" size={15} />
+                        &nbsp; Ganti Password
+                      </Text>
+                    </MenuOption>
+                    <MenuOption>
+                      <Text
+                        style={[styles.textDark, styles.menuText]}
+                        onPress={handleLogout}>
+                        <MaterialCommunityIcons name="logout" size={15} />
+                        &nbsp; Logout
+                      </Text>
+                    </MenuOption>
+                  </MenuOptions>
+                </Menu>
 
-          <View style={[styles.profilePicture]}>
-            <Text style={[styles.textPrimary, styles.profileText]}>
-              {dataProfile?.name
-                ? dataProfile?.name.charAt(0).toUpperCase()
-                : '-'}
-            </Text>
-          </View>
-        </View>
-        <View style={styles.contentContainer}>
-          <View style={styles.viewProfileInfo}>
-            <Text style={[styles.textDark, styles.titleProfileInfo]}>Nama</Text>
-            <Text style={styles.textDark}>{dataProfile?.name ?? '-'}</Text>
-          </View>
-          <View style={styles.viewProfileInfo}>
-            <Text style={[styles.textDark, styles.titleProfileInfo]}>
-              Email
-            </Text>
-            <Text style={styles.textDark}>{dataProfile?.email ?? '-'}</Text>
-          </View>
-          <View style={styles.viewProfileInfo}>
-            <Text style={[styles.textDark, styles.titleProfileInfo]}>
-              Nomor Hp
-            </Text>
-            <Text style={styles.textDark}>{dataProfile?.handphone ?? '-'}</Text>
-          </View>
-          <View style={styles.viewProfileInfo}>
-            <Text style={[styles.textDark, styles.titleProfileInfo]}>
-              Alamat
-            </Text>
-            <Text style={styles.textDark}>{dataProfile?.address ?? '-'}</Text>
-          </View>
-        </View>
-      </SafeAreaView>
+                <View style={[styles.profilePicture]}>
+                  <Text style={[styles.textPrimary, styles.profileText]}>
+                    {dataProfile?.name
+                      ? dataProfile?.name.charAt(0).toUpperCase()
+                      : '-'}
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.contentContainer}>
+                <View style={styles.viewProfileInfo}>
+                  <Text style={[styles.textDark, styles.titleProfileInfo]}>
+                    Nama
+                  </Text>
+                  <Text style={styles.textDark}>
+                    {dataProfile?.name ?? '-'}
+                  </Text>
+                </View>
+                <View style={styles.viewProfileInfo}>
+                  <Text style={[styles.textDark, styles.titleProfileInfo]}>
+                    Email
+                  </Text>
+                  <Text style={styles.textDark}>
+                    {dataProfile?.email ?? '-'}
+                  </Text>
+                </View>
+                <View style={styles.viewProfileInfo}>
+                  <Text style={[styles.textDark, styles.titleProfileInfo]}>
+                    Nomor Hp
+                  </Text>
+                  <Text style={styles.textDark}>
+                    {dataProfile?.handphone ?? '-'}
+                  </Text>
+                </View>
+                <View style={styles.viewProfileInfo}>
+                  <Text style={[styles.textDark, styles.titleProfileInfo]}>
+                    Alamat
+                  </Text>
+                  <Text style={styles.textDark}>
+                    {dataProfile?.address ?? '-'}
+                  </Text>
+                </View>
+              </View>
+            </>
+          </ScrollView>
+          <Toast />
+        </SafeAreaView>
+      )}
     </MenuProvider>
   );
 };

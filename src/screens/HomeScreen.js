@@ -1,7 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import {
-  FlatList,
+  RefreshControl,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -10,10 +11,13 @@ import {
 import moment from 'moment';
 import axiosInstance from '../helpers/axiosConfig';
 import {useFocusEffect} from '@react-navigation/native';
+import ListHistoryComponent from '../components/ListHistoryComponent';
+import style from '../helpers/style';
 
 const HomeScreen = ({navigation}) => {
   moment.locale('id');
 
+  const [refreshing, setRefreshing] = useState(false);
   const [time, setTime] = useState(moment().format('H:m'));
   const [date, setDate] = useState(moment().format('dddd, DD MMMM YYYY'));
   const [checkin, setCheckin] = useState(null);
@@ -37,7 +41,6 @@ const HomeScreen = ({navigation}) => {
       const dataCheckin = data?.check_in;
       const dataCheckout = data?.check_out;
       if (!dataCheckout) {
-        // setAlreadyAttendace(false);
         setAlreadyChekout(false);
       }
       if (dataCheckin) {
@@ -60,7 +63,6 @@ const HomeScreen = ({navigation}) => {
       setDate(moment().format('dddd, DD MMMM YYYY'));
     });
 
-    attendaceToday();
     return () => clearInterval(interval);
   }, []);
 
@@ -72,88 +74,79 @@ const HomeScreen = ({navigation}) => {
     }, []),
   );
 
+  const onRefresh = React.useCallback(() => {
+    getProfile();
+    attendaceToday();
+    attendaceHistory();
+    setRefreshing(false);
+  }, []);
+
   const handleSanner = () => {
     navigation.navigate('Scanner'); // Navigate to HomeTabs on login
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={[styles.bgLight, styles.containerHeader]}>
-        <View style={[styles.bgPrimary, styles.background]} />
-        <View style={styles.center}>
-          <Text style={[styles.textLight, {marginVertical: 15, fontSize: 15}]}>
-            Hallo, {dataProfile?.name ? dataProfile.name : '-'}
-          </Text>
-          <Text style={[styles.textLight, styles.clock]}>{time}</Text>
-          <Text style={styles.textLight}>{date}</Text>
-        </View>
-        <View style={styles.containerCard}>
-          <View style={[styles.bgLight, styles.card]}>
-            <View style={styles.timeContainener}>
-              <View style={styles.timeView}>
-                <Text style={styles.textDark}>Waktu Masuk</Text>
-                <Text style={[styles.textDark, styles.time]}>
-                  {checkin ? checkin.slice(0, -3) : '-'}
-                </Text>
-              </View>
-              <View style={styles.timeView}>
-                <Text style={styles.textDark}>Waktu Pulang</Text>
-                <Text style={[styles.textDark, styles.time]}>
-                  {checkout ? checkout.slice(0, -3) : '-'}
-                </Text>
-              </View>
-            </View>
-            <TouchableOpacity
-              style={
-                alreadyCheckout
-                  ? styles.buttonDisable
-                  : [styles.bgPrimary, styles.button]
-              }
-              onPress={handleSanner}
-              disabled={alreadyCheckout ? true : false}>
-              {alreadyCheckout ? (
-                <Text style={styles.textDark}>Masuk</Text>
-              ) : (
-                <Text style={styles.textLight}>
-                  {alreadyCheckin === true ? 'Pulang' : 'Masuk'}
-                </Text>
-              )}
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-      <View style={[styles.bgLight, styles.containerFlat]}>
-        <Text
-          style={[
-            styles.textDark,
-            {fontSize: 15, fontWeight: 'bold', paddingBottom: 10},
-          ]}>
-          Data absen terbaru
-        </Text>
-        <FlatList
-          data={historyAttendace}
-          keyExtractor={item => item.id.toString()}
-          renderItem={({item}) => (
-            <View style={styles.item}>
+      <View style={[styles.containerHeader]}>
+        <ScrollView
+          scrollEnabled={false}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }>
+          <View style={[style.bgLight, {height: 350}]}>
+            <View style={[style.bgPrimary, styles.background]} />
+            <View style={styles.center}>
               <Text
-                style={[styles.textPrimary, {fontSize: 14, fontWeight: '800'}]}>
-                {moment(item.created_at).format('DD MMMM YYYY')}
+                style={[style.textLight, {marginVertical: 15, fontSize: 15}]}>
+                Hallo, {dataProfile?.name ? dataProfile.name : '-'}
               </Text>
-              <View style={styles.row}>
-                <Text style={styles.title}>Masuk</Text>
-                <Text style={styles.value}>
-                  {item.check_in ? item.check_in.slice(0, -3) : '-'}
-                </Text>
-              </View>
-              <View style={styles.row}>
-                <Text style={styles.title}>Pulang</Text>
-                <Text style={styles.value}>
-                  {item.check_out ? item.check_out.slice(0, -3) : '-'}
-                </Text>
+              <Text style={[style.textLight, styles.clock]}>{time}</Text>
+              <Text style={style.textLight}>{date}</Text>
+            </View>
+            <View style={styles.center}>
+              <View style={[style.bgLight, styles.card]}>
+                <View style={styles.timeContainener}>
+                  <View style={styles.timeView}>
+                    <Text style={style.textDark}>Waktu Masuk</Text>
+                    <Text style={[style.textDark, styles.time]}>
+                      {checkin ? checkin.slice(0, -3) : '-'}
+                    </Text>
+                  </View>
+                  <View style={styles.timeView}>
+                    <Text style={style.textDark}>Waktu Pulang</Text>
+                    <Text style={[style.textDark, styles.time]}>
+                      {checkout ? checkout.slice(0, -3) : '-'}
+                    </Text>
+                  </View>
+                </View>
+                <TouchableOpacity
+                  style={
+                    alreadyCheckout
+                      ? styles.buttonDisable
+                      : [style.bgPrimary, styles.button]
+                  }
+                  onPress={handleSanner}
+                  disabled={alreadyCheckout ? true : false}>
+                  {alreadyCheckout ? (
+                    <Text style={style.textDark}>Masuk</Text>
+                  ) : (
+                    <Text style={style.textLight}>
+                      {alreadyCheckin === true ? 'Pulang' : 'Masuk'}
+                    </Text>
+                  )}
+                </TouchableOpacity>
               </View>
             </View>
-          )}
-        />
+          </View>
+          <View style={[styles.containerFlat]}>
+            <Text style={[style.textDark, {fontSize: 15, fontWeight: 'bold'}]}>
+              Data absen terbaru
+            </Text>
+          </View>
+        </ScrollView>
+      </View>
+      <View style={{flex: 1, flexGrow: 1, height: '100'}}>
+        <ListHistoryComponent data={historyAttendace} />
       </View>
     </SafeAreaView>
   );
@@ -176,35 +169,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  textPrimary: {
-    color: '#2196F3',
-  },
-  textLight: {
-    color: '#f8f9fa',
-  },
-  textDark: {
-    color: '#343a40',
-  },
-  bgPrimary: {
-    backgroundColor: '#2196F3',
-  },
-  bgLight: {
-    backgroundColor: '#f8f9fa',
-  },
   clock: {
     fontSize: 50,
   },
   containerHeader: {
-    height: 350,
+    height: 400,
   },
   background: {
     height: '60%',
     width: '100%',
     position: 'absolute',
-  },
-  containerCard: {
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   card: {
     width: '90%',
@@ -235,26 +209,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-
   containerFlat: {
     flex: 1,
     padding: 16,
-  },
-  item: {
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ccc',
-  },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  title: {
-    color: '#333',
-  },
-  value: {
-    marginVertical: 2,
-    color: '#555',
   },
 });
 
