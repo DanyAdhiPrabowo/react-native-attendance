@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {
+  Alert,
   RefreshControl,
   SafeAreaView,
   ScrollView,
@@ -8,15 +9,13 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import style from '../helpers/style';
 import moment from 'moment';
+import ListHistoryComponent from '../components/ListHistoryComponent';
 import axiosInstance from '../helpers/axiosConfig';
 import {useFocusEffect} from '@react-navigation/native';
-import ListHistoryComponent from '../components/ListHistoryComponent';
-import style from '../helpers/style';
 
-const HomeScreen = ({navigation}) => {
-  moment.locale('id');
-
+const BerandaScreen = ({navigation}) => {
   const [refreshing, setRefreshing] = useState(false);
   const [time, setTime] = useState(moment().format('H:m'));
   const [date, setDate] = useState(moment().format('dddd, DD MMMM YYYY'));
@@ -28,33 +27,48 @@ const HomeScreen = ({navigation}) => {
   const [dataProfile, setDataProfile] = useState([]);
 
   const getProfile = async () => {
-    await axiosInstance.get('/profile').then(res => {
-      const data = res?.data?.data;
-      setDataProfile(data);
-    });
+    await axiosInstance
+      .get('/profile')
+      .then(res => {
+        const data = res?.data?.data;
+        setDataProfile(data);
+      })
+      .catch(err => {
+        console.log(err);
+      });
   };
 
   const attendaceToday = async () => {
-    await axiosInstance.get('/attendance/today').then(res => {
-      const data = res?.data?.data;
-      setCheckin(data?.check_in);
-      const dataCheckin = data?.check_in;
-      const dataCheckout = data?.check_out;
-      if (!dataCheckout) {
-        setAlreadyChekout(false);
-      }
-      if (dataCheckin) {
-        setAlreadyChekin(true);
-      }
-      setCheckout(dataCheckout);
-    });
+    await axiosInstance
+      .get('/attendance/today')
+      .then(res => {
+        const data = res?.data?.data;
+        setCheckin(data?.check_in);
+        const dataCheckin = data?.check_in;
+        const dataCheckout = data?.check_out;
+        if (!dataCheckout) {
+          setAlreadyChekout(false);
+        }
+        if (dataCheckin) {
+          setAlreadyChekin(true);
+        }
+        setCheckout(dataCheckout);
+      })
+      .catch(err => {
+        console.log(err);
+      });
   };
 
   const attendaceHistory = async () => {
-    await axiosInstance.get('/attendance').then(res => {
-      const data = res?.data?.data;
-      setHistoryAttendace(data);
-    });
+    await axiosInstance
+      .get('/attendance')
+      .then(res => {
+        const data = res?.data?.data;
+        setHistoryAttendace(data);
+      })
+      .catch(err => {
+        console.log(err);
+      });
   };
 
   useEffect(() => {
@@ -84,9 +98,8 @@ const HomeScreen = ({navigation}) => {
   const handleSanner = () => {
     navigation.navigate('Scanner'); // Navigate to HomeTabs on login
   };
-
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={[styles.container, {backgroundColor: 'white'}]}>
       <View style={[styles.containerHeader]}>
         <ScrollView
           scrollEnabled={false}
@@ -215,4 +228,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default HomeScreen;
+export default BerandaScreen;
