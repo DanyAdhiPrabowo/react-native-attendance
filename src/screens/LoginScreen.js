@@ -1,23 +1,18 @@
 import React, {useState} from 'react';
-import {
-  Pressable,
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import {Pressable, SafeAreaView, StyleSheet, Text, View} from 'react-native';
 import axiosInstance from '../helpers/axiosConfig';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {ActivityIndicator} from 'react-native';
 import {CommonActions} from '@react-navigation/native';
 import DangerAlertComponent from '../components/DangerAlertComponent';
+import {TextInput} from 'react-native-paper';
 
 const LoginSceen = ({navigation}) => {
   const [email, onChangeEmail] = useState('');
   const [password, onChangePassword] = useState('');
-  let [errorMessage, setErrorMessage] = useState('');
-  let [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleLogin = async () => {
     setLoading(true);
@@ -73,22 +68,29 @@ const LoginSceen = ({navigation}) => {
             <DangerAlertComponent message={errorMessage} />
           ) : null}
           <TextInput
-            style={[styles.input, styles.textDark]}
-            placeholder="Masukkan Email"
-            placeholderTextColor="gray"
+            label="Email"
+            autoFocus={true}
+            mode="outlined"
+            outlineColor="#2196F3"
             onChangeText={onChangeEmail}
             value={email}
-            keyboardType="email"
-            autoFocus={true}
+            keyboardType="email-address"
+            autoCapitalize="none"
           />
           <TextInput
-            style={[styles.input, styles.textDark]}
-            placeholder="Masukkan Password"
-            placeholderTextColor="gray"
+            label="Password"
+            mode="outlined"
+            outlineColor="#2196F3"
             onChangeText={onChangePassword}
             value={password}
-            secureTextEntry={true}
-            inlineImageLeft="search_icon"
+            secureTextEntry={showPassword}
+            autoCapitalize="none"
+            right={
+              <TextInput.Icon
+                icon="eye"
+                onPress={() => setShowPassword(!showPassword)}
+              />
+            }
           />
           <View style={styles.buttonView}>
             <Pressable style={styles.button} onPress={handleLogin}>
