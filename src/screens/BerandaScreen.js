@@ -1,6 +1,5 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {
-  Alert,
   RefreshControl,
   SafeAreaView,
   ScrollView,
@@ -14,6 +13,8 @@ import moment from 'moment';
 import ListHistoryComponent from '../components/ListHistoryComponent';
 import axiosInstance from '../helpers/axiosConfig';
 import {useFocusEffect} from '@react-navigation/native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {Snackbar} from 'react-native-paper';
 
 const BerandaScreen = ({navigation}) => {
   const [refreshing, setRefreshing] = useState(false);
@@ -25,6 +26,8 @@ const BerandaScreen = ({navigation}) => {
   const [alreadyCheckout, setAlreadyChekout] = useState(true);
   const [historyAttendace, setHistoryAttendace] = useState([]);
   const [dataProfile, setDataProfile] = useState([]);
+  const [visible, setVisible] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const getProfile = async () => {
     await axiosInstance
@@ -33,8 +36,8 @@ const BerandaScreen = ({navigation}) => {
         const data = res?.data?.data;
         setDataProfile(data);
       })
-      .catch(err => {
-        console.log(err);
+      .catch(() => {
+        setErrorMessage('Gagal mendapatkan data profile.');
       });
   };
 
@@ -54,8 +57,8 @@ const BerandaScreen = ({navigation}) => {
         }
         setCheckout(dataCheckout);
       })
-      .catch(err => {
-        console.log(err);
+      .catch(() => {
+        setErrorMessage('Gagal mendapatkan data absen.');
       });
   };
 
@@ -66,19 +69,55 @@ const BerandaScreen = ({navigation}) => {
         const data = res?.data?.data;
         setHistoryAttendace(data);
       })
-      .catch(err => {
-        console.log(err);
+      .catch(() => {
+        setErrorMessage('Gagal mendapatkan data absen.');
       });
   };
 
+  const setCode = useCallback(async isRefresh => {
+    try {
+      const getCodeStorage = await AsyncStorage.getItem('code');
+      if (!getCodeStorage || isRefresh) {
+        const response = await axiosInstance.get('/qr-code');
+        const code = response?.data?.data?.code ?? '';
+
+        if (code) {
+          await AsyncStorage.setItem('code', code);
+        } else {
+          setErrorMessage('Kode QR tidak ditemukan.');
+          return null;
+        }
+      }
+    } catch (error) {
+      setErrorMessage('Gagal mendapatkan kode QR.');
+    }
+  }, []);
+
+  const showSnackbar = message => {
+    setErrorMessage(message);
+    setVisible(true);
+
+    // Automatically dismiss the Snackbar after 2 seconds
+    setTimeout(() => {
+      setVisible(false);
+    }, 2000);
+  };
+
+  const onDismissSnackbar = () => setVisible(false);
+
   useEffect(() => {
+    if (errorMessage) {
+      showSnackbar(errorMessage);
+    }
+    setCode();
+
     const interval = setInterval(() => {
       setTime(moment().format('H:mm'));
       setDate(moment().format('dddd, DD MMMM YYYY'));
     });
 
     return () => clearInterval(interval);
-  }, []);
+  }, [errorMessage, setCode]);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -93,13 +132,20 @@ const BerandaScreen = ({navigation}) => {
     attendaceToday();
     attendaceHistory();
     setRefreshing(false);
-  }, []);
+    setCode(true);
+  }, [setCode]);
 
   const handleSanner = () => {
     navigation.navigate('Scanner'); // Navigate to HomeTabs on login
   };
   return (
     <SafeAreaView style={[styles.container, {backgroundColor: 'white'}]}>
+      <Snackbar
+        visible={visible}
+        onDismiss={onDismissSnackbar}
+        duration={Snackbar.DURATION_MEDIUM}>
+        {errorMessage}
+      </Snackbar>
       <View style={[styles.containerHeader]}>
         <ScrollView
           scrollEnabled={false}
