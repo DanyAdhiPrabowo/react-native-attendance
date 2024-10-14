@@ -4,15 +4,6 @@ import {FlatList, StyleSheet, View} from 'react-native';
 import {Text} from 'react-native-paper';
 
 const ListHistoryComponent = props => {
-  const renderHeader = () => (
-    <View
-      style={[styles.bgLight, styles.containerFlat, {backgroundColor: 'red'}]}>
-      <Text style={[styles.textDark, {fontSize: 15, fontWeight: 'bold'}]}>
-        Data absen terbaru
-      </Text>
-    </View>
-  );
-
   return (
     <FlatList
       data={props.data}
