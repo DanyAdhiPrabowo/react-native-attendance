@@ -11,6 +11,7 @@ import {
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Geolocation from 'react-native-geolocation-service';
 import axiosInstance from '../helpers/axiosConfig';
+import {Snackbar} from 'react-native-paper';
 
 const requestLocationPermission = async () => {
   try {
@@ -28,12 +29,17 @@ const requestLocationPermission = async () => {
 };
 
 const AttendaceConfirmScreen = ({navigation}) => {
-  const time = moment().format('H:mm');
+  const time = moment().format('HH:mm');
   const [displayLocation, setDisplayLocation] = useState('');
-  let [errorMessage, setErrorMessage] = useState('');
-  let [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [visibleSnackBar, setVisibleSnackBar] = useState(false);
 
   useEffect(() => {
+    if (errorMessage) {
+      showSnackbar(errorMessage);
+    }
+
     const getLocation = () => {
       const result = requestLocationPermission();
       result.then(res => {
@@ -52,7 +58,7 @@ const AttendaceConfirmScreen = ({navigation}) => {
     };
 
     getLocation();
-  }, []);
+  }, [errorMessage]);
 
   const fetchCity = async (latitude, longitude) => {
     try {
@@ -62,7 +68,7 @@ const AttendaceConfirmScreen = ({navigation}) => {
       const data = await response.json();
       setDisplayLocation(data.display_name);
     } catch (error) {
-      console.error('Error:', error);
+      setErrorMessage('Gagal mendapatkan lokasi');
     }
   };
 
@@ -79,7 +85,6 @@ const AttendaceConfirmScreen = ({navigation}) => {
         navigation.navigate('HomeTabs');
       })
       .catch(err => {
-        console.log(err);
         if (err?.response?.data) {
           setErrorMessage(err.response.data.message);
         } else {
@@ -89,6 +94,18 @@ const AttendaceConfirmScreen = ({navigation}) => {
     setLoading(false);
   };
 
+  const showSnackbar = message => {
+    setErrorMessage(message);
+    setVisibleSnackBar(true);
+
+    setTimeout(() => {
+      setVisibleSnackBar(false);
+      setErrorMessage('');
+    }, 2000);
+  };
+
+  const onDismissSnackbar = () => setVisibleSnackBar(false);
+
   return (
     <View style={(styles.bgLight, styles.container)}>
       {!displayLocation && (
@@ -97,6 +114,12 @@ const AttendaceConfirmScreen = ({navigation}) => {
           <Text style={styles.textDark}>Loading....</Text>
         </View>
       )}
+      <Snackbar
+        visible={visibleSnackBar}
+        onDismiss={onDismissSnackbar}
+        duration={Snackbar.DURATION_MEDIUM}>
+        {errorMessage}
+      </Snackbar>
       {displayLocation && (
         <View style={[styles.content]}>
           <View style={[styles.center, {marginTop: 50, marginBottom: 20}]}>
