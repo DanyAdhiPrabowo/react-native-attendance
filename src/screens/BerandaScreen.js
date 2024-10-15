@@ -49,12 +49,11 @@ const BerandaScreen = ({navigation}) => {
         setCheckin(data?.check_in);
         const dataCheckin = data?.check_in;
         const dataCheckout = data?.check_out;
-        if (!dataCheckout) {
-          setAlreadyChekout(false);
-        }
-        if (dataCheckin) {
-          setAlreadyChekin(true);
-        }
+
+        dataCheckout ? setAlreadyChekout(true) : setAlreadyChekout(false);
+
+        dataCheckin ? setAlreadyChekin(true) : setAlreadyChekin(false);
+
         setCheckout(dataCheckout);
       })
       .catch(() => {
