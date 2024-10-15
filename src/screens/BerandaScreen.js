@@ -32,8 +32,9 @@ const BerandaScreen = ({navigation}) => {
   const getProfile = async () => {
     await axiosInstance
       .get('/profile')
-      .then(res => {
+      .then(async res => {
         const data = res?.data?.data;
+        await AsyncStorage.setItem('profile', JSON.stringify(data));
         setDataProfile(data);
       })
       .catch(() => {
