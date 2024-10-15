@@ -83,11 +83,12 @@ const LoginSceen = ({navigation}) => {
             outlineColor="#2196F3"
             onChangeText={onChangePassword}
             value={password}
-            secureTextEntry={showPassword}
+            secureTextEntry={!showPassword}
             autoCapitalize="none"
             right={
               <TextInput.Icon
-                icon="eye"
+                icon={!showPassword ? 'eye-off' : 'eye'}
+                color="gray"
                 onPress={() => setShowPassword(!showPassword)}
               />
             }
