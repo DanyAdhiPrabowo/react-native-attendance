@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Alert,
   RefreshControl,
@@ -19,42 +19,36 @@ import {
   MenuProvider,
   MenuTrigger,
 } from 'react-native-popup-menu';
-import Toast from 'react-native-toast-message';
 import LoadingScreen from './LoadingScreen';
+import {Snackbar} from 'react-native-paper';
 
 const ProfileScreen = ({navigation}) => {
   const [refreshing, setRefreshing] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [dataProfile, setDataProfile] = useState([]);
   const [menuOpened, setMenuOpened] = useState(false);
-  let [loading, setLoading] = useState(false);
-
-  const showToast = message => {
-    Toast.show({
-      type: 'error',
-      text1: message,
-    });
-  };
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [visibleSnackBar, setVisibleSnackBar] = useState(false);
 
   const getProfile = async () => {
-    setLoading(true);
-    await axiosInstance.get('/profile').then(res => {
-      const data = res?.data?.data;
-      setDataProfile(data);
-    });
-    setLoading(false);
+    try {
+      setLoading(true);
+      const getProfileStorage = await AsyncStorage.getItem('profile');
+      if (getProfileStorage) {
+        const profile = JSON.parse(getProfileStorage);
+        setDataProfile(profile);
+      }
+      await axiosInstance.get('/profile').then(res => {
+        const profile = res?.data?.data;
+        setDataProfile(profile);
+      });
+    } catch (error) {
+      setErrorMessage('Gagal mendapatkan data profile');
+    } finally {
+      setLoading(false);
+    }
   };
-
-  useFocusEffect(
-    React.useCallback(() => {
-      getProfile();
-    }, []),
-  );
-
-  const onRefresh = React.useCallback(() => {
-    setRefreshing(false);
-    getProfile();
-  }, []);
 
   const handleUpdateProfile = () => {
     handleMenuOpened();
@@ -77,6 +71,7 @@ const ProfileScreen = ({navigation}) => {
         text: 'Ya',
         onPress: () => {
           setModalVisible(!modalVisible);
+          setMenuOpened(!menuOpened);
           logout();
         },
       },
@@ -95,13 +90,42 @@ const ProfileScreen = ({navigation}) => {
         );
       })
       .catch(err => {
-        if (err?.response?.data) {
-          showToast(err.response.data.message);
+        if (err?.response?.data?.message) {
+          setErrorMessage(err.response.data.message);
         } else {
-          showToast('Internet server error');
+          setErrorMessage('Internet server error');
         }
       });
   };
+
+  const showSnackbar = message => {
+    setErrorMessage(message);
+    setVisibleSnackBar(true);
+
+    setTimeout(() => {
+      setVisibleSnackBar(false);
+      setErrorMessage('');
+    }, 2000);
+  };
+
+  const onDismissSnackbar = () => setVisibleSnackBar(false);
+
+  useEffect(() => {
+    if (errorMessage) {
+      showSnackbar(errorMessage);
+    }
+  }, [errorMessage]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      getProfile();
+    }, []),
+  );
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(false);
+    getProfile();
+  }, []);
 
   return (
     <MenuProvider>
@@ -109,6 +133,12 @@ const ProfileScreen = ({navigation}) => {
         <LoadingScreen />
       ) : (
         <SafeAreaView style={[styles.container, {backgroundColor: 'white'}]}>
+          <Snackbar
+            visible={visibleSnackBar}
+            onDismiss={onDismissSnackbar}
+            duration={Snackbar.DURATION_MEDIUM}>
+            {errorMessage}
+          </Snackbar>
           <ScrollView
             refreshControl={
               <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -202,7 +232,6 @@ const ProfileScreen = ({navigation}) => {
               </View>
             </>
           </ScrollView>
-          <Toast />
         </SafeAreaView>
       )}
     </MenuProvider>
